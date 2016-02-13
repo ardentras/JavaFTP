@@ -8,24 +8,26 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-public class Display extends JFrame implements ActionListener, WindowListener {
+public class Display extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private static final int FRAME_WIDTH = 800;
 //	private static final int FRAME_HEIGHT = 600;
 //	private static final Dimension WINDOW_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
-	public boolean isWindowClosing = false;
 	
-	public JTextField usernameText, hostText;
+	public boolean isWindowClosing = false;
+	public boolean login = false;
+	public boolean connFailed = false;
+	public JTextField usernameText, hostText, portText;
+	public JPasswordField passwordText;
 	
 	public void createGUI() {
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -52,7 +54,7 @@ public class Display extends JFrame implements ActionListener, WindowListener {
 		this.setVisible(true);
 	}
 	
-	public JPanel makeHeader() {
+	private JPanel makeHeader() {
 		JPanel header = new JPanel();
 		header.setPreferredSize(new Dimension(FRAME_WIDTH, 23));
 		// For debugging panel size
@@ -66,7 +68,7 @@ public class Display extends JFrame implements ActionListener, WindowListener {
 		return header;
 	}
 	
-	public JPanel makePane(GridBagConstraints gbc) {		
+	private JPanel makePane(GridBagConstraints gbc) {		
 		JPanel container = new JPanel();
 		container.setLayout(new GridBagLayout());
 		container.setAlignmentX(LEFT_ALIGNMENT);
@@ -74,8 +76,13 @@ public class Display extends JFrame implements ActionListener, WindowListener {
 		
 		JPanel loginPanel = getLoginPanel(gbc);
 		
+		JButton loginButton = new JButton("Login");
+		loginButton.addActionListener(this);
+		loginButton.setActionCommand("loginbutton");
+		
 		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.FIRST_LINE_START, 0, 0.5F, 0.5F, 0, 0, 0, 0, 0, 0, 0, 0);
 		container.add(loginPanel, gbc);
+		container.add(loginButton);
 		
 		return container;
 	}
@@ -96,11 +103,11 @@ public class Display extends JFrame implements ActionListener, WindowListener {
 		usernameText = new JTextField("Enter username...", 15);
 		usernameText.addActionListener(this);
 		usernameText.setActionCommand("user textfield");
-		JPasswordField passwordText = new JPasswordField(10);
+		passwordText = new JPasswordField(10);
 		hostText = new JTextField("Enter host...", 20);
 		hostText.addActionListener(this);
 		hostText.setActionCommand("host textfield");
-		JTextField portText = new JTextField("80", 2);
+		portText = new JTextField("21", 2);
 
 		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.3F, 0.1F, 0, 0, 0, 0, 0, 2, 2, 3);
 		loginPanel.add(username, gbc);
@@ -129,7 +136,7 @@ public class Display extends JFrame implements ActionListener, WindowListener {
 		return loginPanel;
 	}
 
-	protected static JLabel newJLabel(String text, int fontSize) {
+	private static JLabel newJLabel(String text, int fontSize) {
 		JLabel label = new JLabel(text);
 		label.setFont(new Font("Lucida Grande", Font.PLAIN, fontSize));
 		
@@ -138,46 +145,19 @@ public class Display extends JFrame implements ActionListener, WindowListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO
+		if (e.getActionCommand() == "loginbutton")
+			login = true;
 	}
-
-	@Override
-	public void windowActivated(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
+	
+	public void setConnFailed(boolean b) {
+		connFailed = b;
 	}
-
-	@Override
-	public void windowClosed(WindowEvent e) {
-		isWindowClosing = true;
+	
+	public boolean getConnFailed() {
+		return connFailed;
 	}
-
-	@Override
-	public void windowClosing(WindowEvent e) {
-		
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowIconified(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void windowOpened(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
+	
+	public void setLogin(boolean b) {
+		login = b;
 	}
 }
