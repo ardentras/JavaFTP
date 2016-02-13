@@ -1,5 +1,6 @@
 package com.shaunrasmusen.main;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -22,8 +23,9 @@ public class FTP {
 		ftp.run();
 	}
 	
-	public void run() {		
-		while (!display.isWindowClosing) {
+	public void run() {
+		// TODO Actually make this a condition, not just true... -_-
+		while (true) {
 			if (!connected) {
 				if (display.usernameText.isFocusOwner() && display.usernameText.getText().equals("Enter username..."))
 					display.usernameText.setText("");
@@ -35,16 +37,20 @@ public class FTP {
 				if (!display.hostText.isFocusOwner() && display.hostText.getText().equals(""))
 					display.hostText.setText("Enter host...");
 				
-				if (display.login) {
+				if (display.getLogin()) {
 					try {
 						tryLogin();
 					} catch (IOException e) {
+						display.setInfoText(e.toString(), true);
+					}
+					
+					if (display.getConnFailed()) {
 						display.setLogin(false);
-						System.out.println(e);
+						connected = false;
 					}
 				}
 			} else {
-				System.out.println("Success");
+				// TODO
 			}
 		}
 	}
@@ -56,7 +62,8 @@ public class FTP {
 		String response = "";
 		
 		try {
-			socket = new Socket(InetAddress.getByName(display.hostText.getText()), Integer.parseInt(display.portText.getText()));
+			socket = new Socket(InetAddress.getByName(display.hostText.getText()), 
+					Integer.parseInt(display.portText.getText()));
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 		} catch (NumberFormatException e) {
@@ -66,7 +73,8 @@ public class FTP {
 		response = input.readLine();
 		
 		if (response.startsWith("220 "))
-			System.out.println("Initial connection to " + display.hostText.getText() + "successful! Trying login...");
+			display.setInfoText("Initial connection to " + display.hostText.getText() 
+									+ " successful! Trying login...", false);
 		else {
 			display.setConnFailed(true);
 			throw new IOException("Connection failed! Error " + response);
@@ -83,7 +91,7 @@ public class FTP {
 			passStr += password[i];
 		
 		if (response.startsWith("331 "))
-			System.out.println("Username accepted. Sending password..." + passStr);
+			display.setInfoText("Username accepted. Sending password...", false);
 		else {
 			display.setConnFailed(true);
 			throw new IOException("Username rejected! Error " + response);
@@ -94,11 +102,22 @@ public class FTP {
 		
 		response = input.readLine();
 		
-		if (response.startsWith("230 "))
-			System.out.println("Login successful!");
-		else {
+		if (response.startsWith("230 ")) {
+			display.setInfoText("Login successful!", false);
+			display.setLoginButtonText("Logout");
+			display.hostText.setEditable(false);
+			display.hostText.setBackground(Color.LIGHT_GRAY);
+			display.passwordText.setEditable(false);
+			display.passwordText.setBackground(Color.LIGHT_GRAY);
+			display.portText.setEditable(false);
+			display.portText.setBackground(Color.LIGHT_GRAY);
+			display.usernameText.setEditable(false);
+			display.usernameText.setBackground(Color.LIGHT_GRAY);
+			display.setConnFailed(false);
+			connected = true;
+		} else {
 			display.setConnFailed(true);
-			throw new IOException("Login failed! Error " + response);
+			display.setInfoText("Login failed! Error " + response, true);
 		}
 	}
 }

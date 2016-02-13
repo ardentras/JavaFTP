@@ -13,19 +13,23 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class Display extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private static final int FRAME_WIDTH = 800;
+	private JTextArea info = null;
 //	private static final int FRAME_HEIGHT = 600;
 //	private static final Dimension WINDOW_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
 	
-	public boolean isWindowClosing = false;
-	public boolean login = false;
-	public boolean connFailed = false;
+	private boolean login = false;
+	private boolean logout = false;
+	private boolean connFailed = false;
+	private JButton loginButton = null;
 	public JTextField usernameText, hostText, portText;
 	public JPasswordField passwordText;
 	
@@ -39,10 +43,11 @@ public class Display extends JFrame implements ActionListener {
 		content.setLayout(new GridBagLayout());
 		//content.setPreferredSize(WINDOW_SIZE);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, 1.0F, 0.1F, 0, 0, 0, 23);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+									1.0F, 0.1F, 0, 0, 0, 23, 0, 0, 0, 0);
 		content.add(header, gbc);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.NORTHWEST, 0, 1.0F, 0.4F, 0, 1);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.NORTHWEST, 0, 1.0F, 0.1F, 0, 1);
 		content.add(container, gbc);
 		
 		//this.setSize(WINDOW_SIZE);
@@ -76,15 +81,40 @@ public class Display extends JFrame implements ActionListener {
 		
 		JPanel loginPanel = getLoginPanel(gbc);
 		
-		JButton loginButton = new JButton("Login");
-		loginButton.addActionListener(this);
-		loginButton.setActionCommand("loginbutton");
-		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.FIRST_LINE_START, 0, 0.5F, 0.5F, 0, 0, 0, 0, 0, 0, 0, 0);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.NORTHWEST, 0, 0.5F, 0.5F, 0, 0, 0, 0, 0, 0, 0, 0);
 		container.add(loginPanel, gbc);
-		container.add(loginButton);
+		
+		JPanel infoPanel = getInfoPanel(gbc);
+		
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, 0.5F, 0.5F, 1, 0,
+								0, 0, 0, 4, 0, 0);
+		container.add(infoPanel, gbc);
 		
 		return container;
+	}
+	
+	private JPanel getInfoPanel(GridBagConstraints gbc) {
+		JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new GridBagLayout());
+		// For debugging panel size
+		infoPanel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.RED));
+		infoPanel.setAlignmentX(LEFT_ALIGNMENT);
+		infoPanel.setAlignmentY(TOP_ALIGNMENT);
+		
+		info = new JTextArea("");
+		info.setFont(new Font("Lucida Grande", Font.PLAIN, 11));
+		info.setLineWrap(true);
+		info.setWrapStyleWord(true);
+		info.setPreferredSize(new Dimension(168, 49));
+		info.setColumns(10);
+		info.setRows(3);
+		info.setEditable(false);
+		info.setBackground(Color.LIGHT_GRAY);
+		 
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.5F, 0.5F, 0, 0, 0, 0, 0, 1, 0, 0);
+		infoPanel.add(info, gbc);
+		
+		return infoPanel;
 	}
 	
 	private JPanel getLoginPanel(GridBagConstraints gbc) {
@@ -100,38 +130,42 @@ public class Display extends JFrame implements ActionListener {
 		JLabel host = newJLabel("Host", 14);
 		JLabel port = newJLabel("Port", 14);
 		
-		usernameText = new JTextField("Enter username...", 15);
-		usernameText.addActionListener(this);
-		usernameText.setActionCommand("user textfield");
+		usernameText = new JTextField("Enter username...", 14);
 		passwordText = new JPasswordField(10);
 		hostText = new JTextField("Enter host...", 20);
-		hostText.addActionListener(this);
-		hostText.setActionCommand("host textfield");
 		portText = new JTextField("21", 2);
+		
+		loginButton = new JButton("Login");
+		loginButton.addActionListener(this);
+		loginButton.setActionCommand("loginbutton");
+		loginButton.setPreferredSize(new Dimension(76, 19));
 
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.3F, 0.1F, 0, 0, 0, 0, 0, 2, 2, 3);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3);
 		loginPanel.add(username, gbc);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.3F, 0.5F, 0, 1);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 0, 1);
 		loginPanel.add(usernameText, gbc);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.3F, 0.1F, 1, 0);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 1, 0);
 		loginPanel.add(password, gbc);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.3F, 0.5F, 1, 1);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 1, 1);
 		loginPanel.add(passwordText, gbc);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.3F, 0.1F, 2, 0);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 2, 0);
 		loginPanel.add(host, gbc);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.3F, 0.5F, 2, 1);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 2, 1);
 		loginPanel.add(hostText, gbc);
 		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.0F, 0.1F, 3, 0);
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 3, 0);
 		loginPanel.add(port, gbc);
-		
-		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0.0F, 0.5F, 3, 1);
+				
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 3, 1);
 		loginPanel.add(portText, gbc);
+		
+		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 4, 1);
+		loginPanel.add(loginButton, gbc);
 		
 		return loginPanel;
 	}
@@ -142,11 +176,24 @@ public class Display extends JFrame implements ActionListener {
 		
 		return label;
 	}
+	
+	public void showError(Exception e) {
+		JOptionPane.showMessageDialog(this, e, "An Error Occured!", JOptionPane.ERROR_MESSAGE);
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand() == "loginbutton")
+		if (e.getActionCommand() == "loginbutton") {
 			login = true;
+		}
+	}
+	
+	public void setInfoText(String text, boolean err) {
+		info.setText(text);
+		if (err)
+			info.setForeground(Color.RED);
+		else
+			info.setForeground(Color.BLACK);
 	}
 	
 	public void setConnFailed(boolean b) {
@@ -159,5 +206,21 @@ public class Display extends JFrame implements ActionListener {
 	
 	public void setLogin(boolean b) {
 		login = b;
+	}
+	
+	public boolean getLogin() {
+		return login;
+	}
+	
+	public void setLogout(boolean b) {
+		logout = b;
+	}
+	
+	public boolean getLogout() {
+		return logout;
+	}
+	
+	public void setLoginButtonText(String text) {
+		loginButton.setText(text);
 	}
 }

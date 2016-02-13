@@ -18,7 +18,8 @@ public class GBCSettings {
 	}
 	
 	protected static GridBagConstraints setGBC(GridBagConstraints gbc, 
-			int anchor, int fill, float weightx, float weighty, int gridx, int gridy, int ipadx, int ipady) {
+			int anchor, int fill, float weightx, float weighty, int gridx, int gridy,
+			int gridwidth, int gridheight, int ipadx, int ipady) {
 		
 		gbc.anchor = anchor;
 		gbc.fill = fill;
@@ -26,6 +27,8 @@ public class GBCSettings {
 		gbc.weighty = weighty;
 		gbc.gridx = gridx;
 		gbc.gridy = gridy;
+		gbc.gridwidth = gridwidth;
+		gbc.gridheight = gridheight;
 		gbc.ipadx = ipadx;
 		gbc.ipady = ipady;
 		
