@@ -23,13 +23,16 @@ public class Display extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private static final int FRAME_WIDTH = 800;
 	private JTextArea info = null;
+	private long lastButtonPress = System.currentTimeMillis();
 //	private static final int FRAME_HEIGHT = 600;
 //	private static final Dimension WINDOW_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
 	
 	private boolean login = false;
 	private boolean logout = false;
-	private boolean connFailed = false;
+	// If the program just started, technically the connection failed
+	private boolean connFailed = true;
 	private JButton loginButton = null;
+	
 	public JTextField usernameText, hostText, portText;
 	public JPasswordField passwordText;
 	
@@ -183,8 +186,15 @@ public class Display extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand() == "loginbutton") {
-			login = true;
+		lastButtonPress = System.currentTimeMillis() - lastButtonPress;
+		if (e.getActionCommand() == "loginbutton" && lastButtonPress > 10) {
+			if (connFailed) {
+				login = true;
+				logout = false;
+			} else {
+				login = false;
+				logout = true;
+			}
 		}
 	}
 	

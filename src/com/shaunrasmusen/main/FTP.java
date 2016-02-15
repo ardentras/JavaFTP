@@ -15,6 +15,11 @@ public class FTP {
 	public boolean connected = false;	
 	public static Display display = null;
 	
+	private Socket socket = null;
+	private BufferedReader input = null;
+	private BufferedWriter output = null;
+	private String response = "";
+	
 	public static void main(String[] args) {
 		display = new Display();
 		display.createGUI();
@@ -50,17 +55,47 @@ public class FTP {
 					}
 				}
 			} else {
-				// TODO
+				if (display.getLogout()) {
+					try {
+						tryLogout();
+					} catch (IOException e) {
+						display.setInfoText(e.toString(), true);
+					}
+				}
 			}
 		}
 	}
 	
-	public void tryLogin() throws IOException {
-		Socket socket = null;
-		BufferedReader input = null;
-		BufferedWriter output = null;
-		String response = "";
+	private void tryLogout() throws IOException {
+		display.setInfoText("Aborting connection...", false);
+		output.write("QUIT\r\n");
+		output.flush();
 		
+		response = input.readLine();
+		
+		if (response == null) {
+			socket = null;
+			output = null;
+			input = null;
+			
+			display.setInfoText("Logout successful!", false);
+			display.setLoginButtonText("Login");
+			display.hostText.setEditable(true);
+			display.hostText.setBackground(Color.WHITE);
+			display.passwordText.setEditable(true);
+			display.passwordText.setBackground(Color.WHITE);
+			display.portText.setEditable(true);
+			display.portText.setBackground(Color.WHITE);
+			display.usernameText.setEditable(true);
+			display.usernameText.setBackground(Color.WHITE);
+			display.setConnFailed(true);
+			connected = false;
+		} else {
+			throw new IOException("Unknown error occured! Error " + response);
+		}
+	}
+
+	public void tryLogin() throws IOException {		
 		try {
 			socket = new Socket(InetAddress.getByName(display.hostText.getText()), 
 					Integer.parseInt(display.portText.getText()));
