@@ -7,10 +7,12 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,12 +20,13 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 
-public class Display extends JFrame implements ActionListener {
+public class Display extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private static final int FRAME_WIDTH = 800;
 	private JTextArea info = null;
-	private long lastButtonPress = System.currentTimeMillis();
+	private static long lastButtonPress = System.currentTimeMillis();
 //	private static final int FRAME_HEIGHT = 600;
 //	private static final Dimension WINDOW_SIZE = new Dimension(FRAME_WIDTH, FRAME_HEIGHT);
 	
@@ -120,6 +123,7 @@ public class Display extends JFrame implements ActionListener {
 		return infoPanel;
 	}
 	
+	@SuppressWarnings("serial")
 	private JPanel getLoginPanel(GridBagConstraints gbc) {
 		JPanel loginPanel = new JPanel();
 		loginPanel.setLayout(new GridBagLayout());
@@ -135,13 +139,29 @@ public class Display extends JFrame implements ActionListener {
 		
 		usernameText = new JTextField("Enter username...", 14);
 		passwordText = new JPasswordField(10);
-		hostText = new JTextField("Enter host...", 20);
+		hostText = new JTextField("Enter host...", 18);
 		portText = new JTextField("21", 2);
 		
 		loginButton = new JButton("Login");
-		loginButton.addActionListener(this);
-		loginButton.setActionCommand("loginbutton");
-		loginButton.setPreferredSize(new Dimension(76, 19));
+		AbstractAction loginButtonAction = new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				lastButtonPress = System.currentTimeMillis() - lastButtonPress;
+				if (lastButtonPress > 10) {
+					if (connFailed) {
+						login = true;
+						logout = false;
+					} else {
+						login = false;
+						logout = true;
+					}
+				}
+			}
+		};
+		loginButton.addActionListener(loginButtonAction);
+		loginButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "loginbutton");
+		loginButton.getActionMap().put("loginbutton", loginButtonAction);
+		loginButton.setPreferredSize(new Dimension(90, 19));
 
 		gbc = GBCSettings.setGBC(gbc, GridBagConstraints.WEST, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3);
 		loginPanel.add(username, gbc);
@@ -182,20 +202,6 @@ public class Display extends JFrame implements ActionListener {
 	
 	public void showError(Exception e) {
 		JOptionPane.showMessageDialog(this, e, "An Error Occured!", JOptionPane.ERROR_MESSAGE);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		lastButtonPress = System.currentTimeMillis() - lastButtonPress;
-		if (e.getActionCommand() == "loginbutton" && lastButtonPress > 10) {
-			if (connFailed) {
-				login = true;
-				logout = false;
-			} else {
-				login = false;
-				logout = true;
-			}
-		}
 	}
 	
 	public void setInfoText(String text, boolean err) {

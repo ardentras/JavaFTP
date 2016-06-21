@@ -106,26 +106,27 @@ public class FTP {
 		}
 
 		response = input.readLine();
-		
-		if (response.startsWith("220 "))
+		if (response.startsWith("220")) {
 			display.setInfoText("Initial connection to " + display.hostText.getText() 
 									+ " successful! Trying login...", false);
-		else {
+		} else {
 			display.setConnFailed(true);
 			throw new IOException("Connection failed! Error " + response);
 		}
 		
+		display.setInfoText("Username: " + display.usernameText.getText(), false);
 		output.write("USER " + display.usernameText.getText() + "\r\n");
 		output.flush();
 		
-		response = input.readLine();
+		while ((response = input.readLine()).startsWith("220"))
+			;
 		
 		char[] password = display.passwordText.getPassword();
 		String passStr = "";
 		for (int i = 0; i < password.length; i++)
 			passStr += password[i];
 		
-		if (response.startsWith("331 "))
+		if (response.startsWith("331"))
 			display.setInfoText("Username accepted. Sending password...", false);
 		else {
 			display.setConnFailed(true);
@@ -137,7 +138,7 @@ public class FTP {
 		
 		response = input.readLine();
 		
-		if (response.startsWith("230 ")) {
+		if (response.startsWith("230")) {
 			display.setInfoText("Login successful!", false);
 			display.setLoginButtonText("Logout");
 			display.hostText.setEditable(false);
